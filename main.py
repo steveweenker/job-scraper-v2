@@ -39,6 +39,28 @@ async def scheduled_scan(job_bot: JobBot):
 
         stats = job_bot.scraper.last_stats
         stats["run_type"] = "scheduled"
+
+        sites_checked = stats.get("sites_checked", 0)
+        total_jobs = stats.get("total_jobs", 0)
+        now = datetime.now().strftime("%d %b %Y, %I:%M %p")
+
+        if new_jobs:
+            summary = (
+                f"✅ <b>Scan Complete</b> — {now}\n\n"
+                f"🏢 Sites checked: {sites_checked}\n"
+                f"📄 Total jobs found: {total_jobs}\n"
+                f"🆕 New jobs sent: {len(new_jobs)}"
+            )
+        else:
+            summary = (
+                f"✅ <b>Scan Complete</b> — {now}\n\n"
+                f"🏢 Sites checked: {sites_checked}\n"
+                f"📄 Total jobs found: {total_jobs}\n"
+                f"🆕 New jobs: 0\n\n"
+                f"No new matching postings right now."
+            )
+
+        await job_bot.send_message(summary)
     except Exception as e:
         logger.error(f"Scheduled scan error: {e}")
         try:
