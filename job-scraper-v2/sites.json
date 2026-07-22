@@ -1,0 +1,66 @@
+{
+  "sites": [
+    {
+      "name": "Mastercard",
+      "slug": "mastercard",
+      "subdomain": "wd5",
+      "site_path": "Careers",
+      "career_url": "https://mastercard.wd5.myworkdayjobs.com"
+    },
+    {
+      "name": "Visa",
+      "slug": "visa",
+      "subdomain": "wd5",
+      "site_path": "Careers",
+      "career_url": "https://visa.wd5.myworkdayjobs.com"
+    },
+    {
+      "name": "Workday",
+      "slug": "workday",
+      "subdomain": "wd5",
+      "site_path": "Careers",
+      "career_url": "https://workday.wd5.myworkdayjobs.com"
+    },
+    {
+      "name": "Thomson Reuters",
+      "slug": "thomsonreuters",
+      "subdomain": "wd5",
+      "site_path": "Careers",
+      "career_url": "https://thomsonreuters.wd5.myworkdayjobs.com"
+    },
+    {
+      "name": "Kyndryl",
+      "slug": "kyndryl",
+      "subdomain": "wd5",
+      "site_path": "Careers",
+      "career_url": "https://kyndryl.wd5.myworkdayjobs.com"
+    },
+    {
+      "name": "Allegion",
+      "slug": "allegion",
+      "subdomain": "wd5",
+      "site_path": "Careers",
+      "career_url": "https://allegion.wd5.myworkdayjobs.com"
+    }
+  ],
+  "search_queries": ["Software Engineer", "Associate Software Engineer", "Software Developer"],
+  "india_locations": [
+    "india", "pune", "bangalore", "bengaluru", "gurugram", "gurgaon",
+    "vadodara", "hyderabad", "noida", "chennai", "mumbai", "delhi",
+    "nagpur", "coimbatore", "kochi", "jaipur", "ahmedabad", "lucknow",
+    "indore", "bhopal", "mysore", "mangalore", "visakhapatnam",
+    "vijayawada", "tiruchirappalli", "madurai", "thiruvananthapuram", "kolkata"
+  ],
+  "title_allow": [
+    "software engineer",
+    "software developer",
+    "sde",
+    "developer associate",
+    "graduate software"
+  ],
+  "title_exclude": [
+    "senior", "sr.", "sr ", "lead", "principal", "staff",
+    "architect", "manager", "director", "vice president", "vp",
+    "intern", "internship", "head"
+  ]
+}
