@@ -41,7 +41,7 @@ async def scheduled_scan(job_bot: JobBot):
 
     try:
         sites = job_bot.sites_config.get("sites", [])
-        total_sources = len(sites) + 4
+        total_sources = len(sites) + 6
 
         status_msg = await job_bot.send_message(
             f"🔍 <b>Auto-scan started</b> — Scanning {total_sources} sources...\n\n"
@@ -49,7 +49,9 @@ async def scheduled_scan(job_bot: JobBot):
             f"⏳ Adzuna: {'Active' if job_bot.scraper.adzuna.available else 'No key'}\n"
             f"⏳ Jooble: {'Active' if job_bot.scraper.jooble.available else 'No key'}\n"
             f"⏳ RemoteOK: Active\n"
-            f"⏳ LinkedIn: Active"
+            f"⏳ LinkedIn: Active\n"
+            f"⏳ Remotive: Active\n"
+            f"⏳ Arbeitnow: Active"
         )
 
         all_jobs = []
@@ -97,6 +99,22 @@ async def scheduled_scan(job_bot: JobBot):
             stats["LinkedIn"] = {"total": len(linkedin_jobs), "source": "LinkedIn"}
         except Exception as e:
             stats["LinkedIn"] = {"error": str(e), "source": "LinkedIn"}
+
+        # Remotive
+        try:
+            remotive_jobs = job_bot.scraper.remotive.scrape()
+            all_jobs.extend(remotive_jobs)
+            stats["Remotive"] = {"total": len(remotive_jobs), "source": "Remotive"}
+        except Exception as e:
+            stats["Remotive"] = {"error": str(e), "source": "Remotive"}
+
+        # Arbeitnow
+        try:
+            arbeitnow_jobs = job_bot.scraper.arbeitnow.scrape()
+            all_jobs.extend(arbeitnow_jobs)
+            stats["Arbeitnow"] = {"total": len(arbeitnow_jobs), "source": "Arbeitnow"}
+        except Exception as e:
+            stats["Arbeitnow"] = {"error": str(e), "source": "Arbeitnow"}
 
         filtered = job_bot.scraper.filter_jobs(all_jobs)
         new_jobs = [j for j in filtered if j["id"] not in job_bot.seen_ids]
@@ -180,7 +198,7 @@ def main():
         await application.bot.send_message(
             chat_id=job_bot.chat_id,
             text="🚀 <b>Job Scraper Bot v2 is live!</b>\n\n"
-                 "Scanning 80+ Workday companies, Adzuna, Jooble, RemoteOK & LinkedIn.\n"
+                 "Scanning 7 sources: Workday, Adzuna, Jooble, RemoteOK, LinkedIn, Remotive, Arbeitnow.\n"
                  "Scheduled: every 12h (09:00 & 21:00).\n\n"
                  "Type /help for commands.",
             parse_mode="HTML",

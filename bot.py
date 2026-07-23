@@ -64,8 +64,10 @@ class JobBot:
     async def cmd_start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(
             "🤖 <b>Job Scraper Bot v2</b>\n\n"
-            "Scans Workday, Adzuna, Jooble, RemoteOK & LinkedIn\n"
-            "for entry-level Software Engineer & CSE fresher roles in India.\n\n"
+            "Scans 7 sources for entry-level IT fresher jobs in India:\n"
+            "Workday, Adzuna, Jooble, RemoteOK, LinkedIn, Remotive, Arbeitnow\n\n"
+            "Roles: SDE, Full Stack, AI/ML, Java, Python, DevOps, Data, QA & more\n"
+            "Experience: 0-3 years (fresher friendly)\n\n"
             "Type /help to see all commands.",
             parse_mode="HTML",
         )
@@ -94,35 +96,18 @@ class JobBot:
         self.bot = context.bot
 
         try:
-            sources = self.scraper.get_sources_status()
             sites = self.sites_config.get("sites", [])
-            total_sources = len(sites) + 4
+            total_sources = len(sites) + 6
 
-            await status_msg.edit_text(
-                f"🔍 <b>Scanning {total_sources} sources...</b>\n\n"
-                f"⏳ Workday: {len(sites)} companies\n"
-                f"⏳ Adzuna: {'Active' if self.scraper.adzuna.available else 'No key'}\n"
-                f"⏳ Jooble: {'Active' if self.scraper.jooble.available else 'No key'}\n"
-                f"⏳ RemoteOK: Active\n"
-                f"⏳ LinkedIn: Active"
-            )
-
-            progress_updates = []
             all_jobs = []
             stats = {}
-            import time
 
-            # Workday
             await status_msg.edit_text(
                 f"🔍 <b>Scanning {total_sources} sources...</b>\n\n"
-                f"🔄 Workday: Scanning {len(sites)} companies...\n"
-                f"⏳ Adzuna: Waiting\n"
-                f"⏳ Jooble: Waiting\n"
-                f"⏳ RemoteOK: Waiting\n"
-                f"⏳ LinkedIn: Waiting"
+                f"🔄 Workday: {len(sites)} companies...\n"
+                f"⏳ Adzuna\n⏳ Jooble\n⏳ RemoteOK\n⏳ LinkedIn\n⏳ Remotive\n⏳ Arbeitnow"
             )
 
-            from scraper import WorkdayScraper
             workday_jobs = []
             for site in sites:
                 try:
@@ -135,79 +120,105 @@ class JobBot:
 
             await status_msg.edit_text(
                 f"🔍 <b>Scanning {total_sources} sources...</b>\n\n"
-                f"✅ Workday: <b>{len(workday_jobs)}</b> jobs found\n"
-                f"🔄 Adzuna: Scanning...\n"
-                f"⏳ Jooble: Waiting\n"
-                f"⏳ RemoteOK: Waiting\n"
-                f"⏳ LinkedIn: Waiting"
+                f"✅ Workday: <b>{len(workday_jobs)}</b> jobs\n"
+                f"🔄 Adzuna...\n⏳ Jooble\n⏳ RemoteOK\n⏳ LinkedIn\n⏳ Remotive\n⏳ Arbeitnow"
             )
 
-            # Adzuna
             try:
                 adzuna_jobs = self.scraper.adzuna.scrape()
                 all_jobs.extend(adzuna_jobs)
                 stats["Adzuna"] = {"total": len(adzuna_jobs), "source": "Adzuna"}
             except Exception as e:
                 stats["Adzuna"] = {"error": str(e), "source": "Adzuna"}
+                adzuna_jobs = []
 
             await status_msg.edit_text(
                 f"🔍 <b>Scanning {total_sources} sources...</b>\n\n"
-                f"✅ Workday: <b>{len(workday_jobs)}</b> jobs found\n"
-                f"✅ Adzuna: <b>{len(adzuna_jobs) if 'adzuna_jobs' in dir() else 0}</b> jobs found\n"
-                f"🔄 Jooble: Scanning...\n"
-                f"⏳ RemoteOK: Waiting\n"
-                f"⏳ LinkedIn: Waiting"
+                f"✅ Workday: <b>{len(workday_jobs)}</b> jobs\n"
+                f"✅ Adzuna: <b>{len(adzuna_jobs)}</b> jobs\n"
+                f"🔄 Jooble...\n⏳ RemoteOK\n⏳ LinkedIn\n⏳ Remotive\n⏳ Arbeitnow"
             )
 
-            # Jooble
             try:
                 jooble_jobs = self.scraper.jooble.scrape()
                 all_jobs.extend(jooble_jobs)
                 stats["Jooble"] = {"total": len(jooble_jobs), "source": "Jooble"}
             except Exception as e:
                 stats["Jooble"] = {"error": str(e), "source": "Jooble"}
+                jooble_jobs = []
 
             await status_msg.edit_text(
                 f"🔍 <b>Scanning {total_sources} sources...</b>\n\n"
                 f"✅ Workday: <b>{len(workday_jobs)}</b> jobs\n"
-                f"✅ Adzuna: <b>{len(adzuna_jobs) if 'adzuna_jobs' in dir() else 0}</b> jobs\n"
-                f"✅ Jooble: <b>{len(jooble_jobs) if 'jooble_jobs' in dir() else 0}</b> jobs\n"
-                f"🔄 RemoteOK: Scanning...\n"
-                f"⏳ LinkedIn: Waiting"
+                f"✅ Adzuna: <b>{len(adzuna_jobs)}</b> jobs\n"
+                f"✅ Jooble: <b>{len(jooble_jobs)}</b> jobs\n"
+                f"🔄 RemoteOK...\n⏳ LinkedIn\n⏳ Remotive\n⏳ Arbeitnow"
             )
 
-            # RemoteOK
             try:
                 remote_jobs = self.scraper.remoteok.scrape()
                 all_jobs.extend(remote_jobs)
                 stats["RemoteOK"] = {"total": len(remote_jobs), "source": "RemoteOK"}
             except Exception as e:
                 stats["RemoteOK"] = {"error": str(e), "source": "RemoteOK"}
+                remote_jobs = []
 
             await status_msg.edit_text(
                 f"🔍 <b>Scanning {total_sources} sources...</b>\n\n"
                 f"✅ Workday: <b>{len(workday_jobs)}</b> jobs\n"
-                f"✅ Adzuna: <b>{len(adzuna_jobs) if 'adzuna_jobs' in dir() else 0}</b> jobs\n"
-                f"✅ Jooble: <b>{len(jooble_jobs) if 'jooble_jobs' in dir() else 0}</b> jobs\n"
-                f"✅ RemoteOK: <b>{len(remote_jobs) if 'remote_jobs' in dir() else 0}</b> jobs\n"
-                f"🔄 LinkedIn: Scanning..."
+                f"✅ Adzuna: <b>{len(adzuna_jobs)}</b> jobs\n"
+                f"✅ Jooble: <b>{len(jooble_jobs)}</b> jobs\n"
+                f"✅ RemoteOK: <b>{len(remote_jobs)}</b> jobs\n"
+                f"🔄 LinkedIn...\n⏳ Remotive\n⏳ Arbeitnow"
             )
 
-            # LinkedIn
             try:
                 linkedin_jobs = self.scraper.linkedin.scrape()
                 all_jobs.extend(linkedin_jobs)
                 stats["LinkedIn"] = {"total": len(linkedin_jobs), "source": "LinkedIn"}
             except Exception as e:
                 stats["LinkedIn"] = {"error": str(e), "source": "LinkedIn"}
+                linkedin_jobs = []
 
             await status_msg.edit_text(
-                f"🔍 <b>Scanning complete! Filtering...</b>\n\n"
+                f"🔍 <b>Scanning {total_sources} sources...</b>\n\n"
                 f"✅ Workday: <b>{len(workday_jobs)}</b> jobs\n"
-                f"✅ Adzuna: <b>{len(adzuna_jobs) if 'adzuna_jobs' in dir() else 0}</b> jobs\n"
-                f"✅ Jooble: <b>{len(jooble_jobs) if 'jooble_jobs' in dir() else 0}</b> jobs\n"
-                f"✅ RemoteOK: <b>{len(remote_jobs) if 'remote_jobs' in dir() else 0}</b> jobs\n"
-                f"✅ LinkedIn: <b>{len(linkedin_jobs) if 'linkedin_jobs' in dir() else 0}</b> jobs\n\n"
+                f"✅ Adzuna: <b>{len(adzuna_jobs)}</b> jobs\n"
+                f"✅ Jooble: <b>{len(jooble_jobs)}</b> jobs\n"
+                f"✅ RemoteOK: <b>{len(remote_jobs)}</b> jobs\n"
+                f"✅ LinkedIn: <b>{len(linkedin_jobs)}</b> jobs\n"
+                f"🔄 Remotive...\n⏳ Arbeitnow"
+            )
+
+            try:
+                remotive_jobs = self.scraper.remotive.scrape()
+                all_jobs.extend(remotive_jobs)
+                stats["Remotive"] = {"total": len(remotive_jobs), "source": "Remotive"}
+            except Exception as e:
+                stats["Remotive"] = {"error": str(e), "source": "Remotive"}
+                remotive_jobs = []
+
+            await status_msg.edit_text(
+                f"🔍 <b>Scanning {total_sources} sources...</b>\n\n"
+                f"✅ Workday: <b>{len(workday_jobs)}</b> jobs\n"
+                f"✅ Adzuna: <b>{len(adzuna_jobs)}</b> jobs\n"
+                f"✅ Jooble: <b>{len(jooble_jobs)}</b> jobs\n"
+                f"✅ RemoteOK: <b>{len(remote_jobs)}</b> jobs\n"
+                f"✅ LinkedIn: <b>{len(linkedin_jobs)}</b> jobs\n"
+                f"✅ Remotive: <b>{len(remotive_jobs)}</b> jobs\n"
+                f"🔄 Arbeitnow..."
+            )
+
+            try:
+                arbeitnow_jobs = self.scraper.arbeitnow.scrape()
+                all_jobs.extend(arbeitnow_jobs)
+                stats["Arbeitnow"] = {"total": len(arbeitnow_jobs), "source": "Arbeitnow"}
+            except Exception as e:
+                stats["Arbeitnow"] = {"error": str(e), "source": "Arbeitnow"}
+                arbeitnow_jobs = []
+
+            await status_msg.edit_text(
+                f"🔍 <b>All sources scanned! Filtering for India IT fresher roles...</b>\n\n"
                 f"📄 Total raw: <b>{len(all_jobs)}</b>"
             )
 
@@ -235,7 +246,7 @@ class JobBot:
                 summary = (
                     f"✅ <b>Scan Complete</b> — {now}\n\n"
                     f"📄 Total fetched: {len(all_jobs)}\n"
-                    f"🎯 Matching India SE/Fresher: {len(filtered)}\n"
+                    f"🎯 Matching India IT Fresher: {len(filtered)}\n"
                     f"🆕 New jobs sent: {len(new_jobs)}\n\n"
                     f"📋 <b>Source Breakdown:</b>\n"
                 )
@@ -243,7 +254,7 @@ class JobBot:
                 summary = (
                     f"✅ <b>Scan Complete</b> — {now}\n\n"
                     f"📄 Total fetched: {len(all_jobs)}\n"
-                    f"🎯 Matching India SE/Fresher: {len(filtered)}\n"
+                    f"🎯 Matching India IT Fresher: {len(filtered)}\n"
                     f"🆕 New jobs: 0\n\n"
                     f"No new matching postings right now.\n\n"
                     f"📋 <b>Source Breakdown:</b>\n"
@@ -265,7 +276,7 @@ class JobBot:
 
     async def cmd_sources(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         sources = self.scraper.get_sources_status()
-        lines = ["📡 <b>Job Sources</b>\n"]
+        lines = ["📡 <b>Job Sources (7 total)</b>\n"]
         for name, status in sources.items():
             icon = "✅" if "Active" in status or "configured" in status else "⚠️"
             lines.append(f"{icon} <b>{name}</b> — {status}")
@@ -288,7 +299,7 @@ class JobBot:
         if len(args) < 4:
             await update.message.reply_text(
                 "Usage: /addsite &lt;name&gt; &lt;slug&gt; &lt;subdomain&gt; &lt;site_path&gt;\n\n"
-                "Example: /addsite Cisco cisco wd1 cisco",
+                "Example: /addsite Cisco cisco wd1 External",
                 parse_mode="HTML",
             )
             return
@@ -325,7 +336,7 @@ class JobBot:
             "📊 <b>Last Scan Status</b>\n",
             f"🕐 Last run: {self.scraper.last_run or 'Never'}",
             f"📄 Total fetched: {stats.get('total_fetched', 0)}",
-            f"🎯 Matching India SE/Fresher: {stats.get('matching', 0)}",
+            f"🎯 Matching India IT Fresher: {stats.get('matching', 0)}",
             f"🆕 New jobs sent: {stats.get('new_jobs', 0)}",
             f"📨 All-time sent: {len(self.seen_ids)}",
             "",

@@ -17,48 +17,39 @@ INDIA_LOCATIONS = [
     "indore", "bhopal", "mysore", "mangalore", "visakhapatnam",
     "vijayawada", "tiruchirappalli", "madurai", "thiruvananthapuram", "kolkata",
     "remote", "anywhere", "work from home", "india remote",
+    "worldwide", "global", "apac", "asia pacific",
 ]
 
 TITLE_ALLOW = [
-    r"software\s+engineer",
-    r"software\s+developer",
-    r"\bsde\b",
-    r"developer\s+associate",
-    r"graduate\s+software",
-    r"trainee\s+software",
-    r"junior\s+software",
-    r"fresher\s+software",
-    r"software\s+trainee",
-    r"software\s+analyst",
-    r"systems?\s+engineer",
-    r"technical\s+analyst",
-    r"programmer\s+analyst",
-    r"application\s+developer",
-    r"full[\s-]?stack",
-    r"back[\s-]?end",
-    r"front[\s-]?end",
-    r"java\s+developer",
-    r"python\s+developer",
-    r"cloud\s+engineer",
-    r"devops\s+engineer",
-    r"data\s+engineer",
-    r"ml\s+engineer",
-    r"machine\s+learning",
-    r"backend\s+developer",
-    r"frontend\s+developer",
-    r"mobile\s+developer",
-    r"ios\s+developer",
-    r"android\s+developer",
-    r"qa\s+engineer",
-    r"test\s+engineer",
-    r"automation\s+engineer",
-    r"platform\s+engineer",
-    r"infrastructure",
-    r"release\s+engineer",
-    r"build\s+engineer",
-    r"site\s+reliability",
-    r"\bsre\b",
-    r"technical\s+support\s+engineer",
+    r"software\s+engineer", r"software\s+developer", r"\bsde\b",
+    r"developer\s+associate", r"graduate\s+software", r"trainee\s+software",
+    r"junior\s+software", r"fresher", r"software\s+trainee",
+    r"software\s+analyst", r"systems?\s+engineer", r"technical\s+analyst",
+    r"programmer\s+analyst", r"application\s+developer",
+    r"full[\s-]?stack", r"back[\s-]?end", r"front[\s-]?end",
+    r"backend", r"frontend", r"node\.?js", r"react\.?js", r"react\s+developer",
+    r"angular\s+developer", r"vue\.?js", r"java\s+developer", r"python\s+developer",
+    r"cloud\s+engineer", r"devops\s+engineer", r"data\s+engineer",
+    r"ml\s+engineer", r"machine\s+learning", r"ai\s+engineer", r"artificial\s+intelligence",
+    r"deep\s+learning", r"data\s+scientist", r"data\s+analyst",
+    r"mobile\s+developer", r"ios\s+developer", r"android\s+developer",
+    r"qa\s+engineer", r"test\s+engineer", r"automation\s+engineer",
+    r"platform\s+engineer", r"infrastructure", r"release\s+engineer",
+    r"build\s+engineer", r"site\s+reliability", r"\bsre\b",
+    r"technical\s+support\s+engineer", r"solutions\s+engineer",
+    r"security\s+engineer", r"network\s+engineer", r"database\s+engineer",
+    r"blockchain\s+developer", r"web\s+developer", r"php\s+developer",
+    r"dot\.?net\s+developer", r"\bc#\s+developer", r"ruby\s+developer",
+    r"go\s+developer", r"golang", r"rust\s+developer", r"scala\s+developer",
+    r"cyber\s+security", r"information\s+security", r"penetration\s+tester",
+    r"product\s+engineer", r"technical\s+writer", r"scrum\s+master",
+    r"rpa\s+developer", r"salesforce\s+developer", r"sap\s+developer",
+    r"etl\s+developer", r"big\s+data", r"hadoop", r"spark",
+    r"flutter\s+developer", r"react\s+native", r"unity\s+developer",
+    r"game\s+developer", r"embedded\s+engineer", r"iot\s+engineer",
+    r"robotics\s+engineer", r"computer\s+vision", r"nlp\s+engineer",
+    r"genai", r"generative\s+ai", r"llm", r"prompt\s+engineer",
+    r"mlops", r"data\s+platform", r"analytics\s+engineer",
 ]
 
 TITLE_EXCLUDE = [
@@ -68,7 +59,7 @@ TITLE_EXCLUDE = [
     r"\bII\b", r"\bIII\b", r"\bIV\b", r"\bV\b",
     r"[\s\-]2\b", r"[\s\-]3\b", r"[\s\-]4\b", r"[\s\-]5\b",
     r"\bintern\b", r"\binternship\b", r"\bcontract\b",
-    r"\bconsultant\b", r"\badvisory\b",
+    r"\bconsultant\b", r"\badvisory\b", r"\bfellow\b", r"\bco-op\b",
 ]
 
 WORKDAY_QUERIES = [
@@ -77,6 +68,12 @@ WORKDAY_QUERIES = [
     "Cloud Engineer", "DevOps Engineer", "Data Engineer",
     "Full Stack Developer", "Backend Developer", "Frontend Developer",
     "Fresher", "Graduate Engineer", "Trainee",
+    "Junior Software Engineer", "Entry Level Developer",
+    "Software Analyst", "Programmer Analyst",
+    "Technical Analyst", "Application Developer",
+    "Mobile Developer", "QA Engineer", "Test Engineer",
+    "AI Engineer", "Machine Learning", "Data Scientist",
+    "React Developer", "Node Developer", "Angular Developer",
 ]
 
 
@@ -96,7 +93,7 @@ class WorkdayScraper:
         with urllib.request.urlopen(req, context=self.ctx, timeout=30) as resp:
             return json.loads(resp.read().decode("utf-8"))
 
-    def scrape_site(self, site, progress_callback=None):
+    def scrape_site(self, site):
         api_url = f"https://{site['slug']}.{site['subdomain']}.myworkdayjobs.com/wday/cxs/{site['slug']}/{site['site_path']}/jobs"
         api_base = f"https://{site['slug']}.{site['subdomain']}.myworkdayjobs.com/en-US/{site['site_path']}"
 
@@ -154,10 +151,16 @@ class AdzunaScraper:
             "SDE fresher", "full stack developer", "java developer",
             "python developer", "cloud engineer", "data engineer",
             "backend developer", "frontend developer",
+            "machine learning engineer", "ai engineer",
+            "devops engineer", "data scientist", "mobile developer",
+            "react developer", "node developer", "angular developer",
+            "qa engineer", "test engineer", "automation engineer",
+            "blockchain developer", "web developer", "php developer",
+            "flutter developer", "android developer", "ios developer",
         ]
         for q in queries:
             try:
-                url = f"https://api.adzuna.com/v1/api/jobs/in/search/1?app_id={self.app_id}&app_key={self.app_key}&q={urllib.parse.quote(q)}&results_per_page=50&what=software+engineer&where=india&max_days_old=14"
+                url = f"https://api.adzuna.com/v1/api/jobs/in/search/1?app_id={self.app_id}&app_key={self.app_key}&q={urllib.parse.quote(q)}&results_per_page=50&what=software+engineer&where=india&max_days_old=14&content-type=application/json"
                 req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
                 with urllib.request.urlopen(req, context=self.ctx, timeout=15) as resp:
                     data = json.loads(resp.read().decode("utf-8"))
@@ -166,6 +169,7 @@ class AdzunaScraper:
                     title = j.get("title", "")
                     desc = j.get("description", "")
                     company = j.get("company", {}).get("display_name", "Unknown")
+                    contract = j.get("contract_time", "")
                     jobs.append({
                         "id": f"adzuna|{j.get('id', '')}",
                         "title": title,
@@ -193,16 +197,19 @@ class JoobleScraper:
             return []
         jobs = []
         queries = [
-            "software engineer fresher India", "software developer junior India",
+            "fresher software engineer India", "junior software developer India",
             "SDE entry level India", "full stack developer India",
-            "java developer India", "python developer India",
+            "java developer fresher India", "python developer India",
             "cloud engineer India", "data engineer India",
             "backend developer India", "frontend developer India",
-            "freshers software engineer India", "trainee software India",
+            "AI engineer India", "machine learning India",
+            "devops engineer India", "data scientist India",
+            "mobile developer India", "react developer India",
+            "node developer India", "QA engineer India",
         ]
         for q in queries:
             try:
-                url = f"https://jooble.org/api/"
+                url = "https://jooble.org/api/"
                 payload = json.dumps({"keywords": q, "page": 1, "count": 50}).encode("utf-8")
                 req = urllib.request.Request(url, data=payload, headers={
                     "Content-Type": "application/json",
@@ -237,12 +244,6 @@ class RemoteOKScraper:
 
     def scrape(self):
         jobs = []
-        tags_to_search = [
-            "software-engineer", "developer", "python", "java",
-            "javascript", "full-stack", "backend", "frontend",
-            "devops", "data-engineer", "cloud", "sre",
-            "mobile", "react", "node", "golang", "rust",
-        ]
         try:
             url = "https://remoteok.com/api"
             req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
@@ -283,6 +284,16 @@ class LinkedInScraper:
             "full stack developer india",
             "java developer fresher india",
             "python developer india",
+            "AI engineer india",
+            "machine learning india",
+            "data scientist india",
+            "devops engineer india",
+            "cloud engineer india",
+            "mobile developer india",
+            "react developer india",
+            "frontend developer india",
+            "backend developer india",
+            "QA engineer india",
         ]
         try:
             for q in queries:
@@ -294,13 +305,12 @@ class LinkedInScraper:
                 })
                 with urllib.request.urlopen(req, context=self.ctx, timeout=15) as resp:
                     html = resp.read().decode("utf-8")
-                import re as re_mod
-                cards = re_mod.findall(r'<li class=".*?".*?</li>', html, re_mod.DOTALL)
+                cards = re.findall(r'<li class=".*?".*?</li>', html, re.DOTALL)
                 for card in cards[:25]:
-                    title_m = re_mod.search(r'class="base-search-card__title"[^>]*>(.*?)</h3>', card, re_mod.DOTALL)
-                    company_m = re_mod.search(r'class="base-search-card__subtitle"[^>]*>.*?>(.*?)</a>', card, re_mod.DOTALL)
-                    link_m = re_mod.search(r'href="(https://www\.linkedin\.com/jobs/view/[^"]+)"', card)
-                    loc_m = re_mod.search(r'class="job-search-card__location"[^>]*>(.*?)</span>', card, re_mod.DOTALL)
+                    title_m = re.search(r'class="base-search-card__title"[^>]*>(.*?)</h3>', card, re.DOTALL)
+                    company_m = re.search(r'class="base-search-card__subtitle"[^>]*>.*?>(.*?)</a>', card, re.DOTALL)
+                    link_m = re.search(r'href="(https://www\.linkedin\.com/jobs/view/[^"]+)"', card)
+                    loc_m = re.search(r'class="job-search-card__location"[^>]*>(.*?)</span>', card, re.DOTALL)
                     title = title_m.group(1).strip() if title_m else ""
                     company = company_m.group(1).strip() if company_m else "Unknown"
                     link = link_m.group(1) if link_m else ""
@@ -322,6 +332,73 @@ class LinkedInScraper:
         return jobs
 
 
+class RemotiveScraper:
+    def __init__(self):
+        self.ctx = ssl.create_default_context()
+
+    def scrape(self):
+        jobs = []
+        categories = [
+            "software-dev", "data", "design", "business",
+            "customer-support", "marketing", "devops",
+        ]
+        try:
+            for cat in categories:
+                url = f"https://remotive.com/api/remote-jobs?category={cat}&limit=100"
+                req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+                with urllib.request.urlopen(req, context=self.ctx, timeout=15) as resp:
+                    data = json.loads(resp.read().decode("utf-8"))
+                for j in data.get("jobs", []):
+                    title = j.get("title", "")
+                    company = j.get("company_name", "Unknown")
+                    tags = " ".join(j.get("tags", []))
+                    jobs.append({
+                        "id": f"remotive|{j.get('id', '')}",
+                        "title": title,
+                        "company": company,
+                        "location": j.get("candidate_required_location", "Remote"),
+                        "posted": j.get("publication_date", ""),
+                        "url": j.get("url", ""),
+                        "source": "Remotive",
+                        "description": j.get("description", "")[:200],
+                    })
+                time.sleep(0.3)
+        except Exception as e:
+            logger.error(f"Remotive error: {e}")
+        return jobs
+
+
+class ArbeitnowScraper:
+    def __init__(self):
+        self.ctx = ssl.create_default_context()
+
+    def scrape(self):
+        jobs = []
+        try:
+            url = "https://arbeitnow.com/api/job-board-api"
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req, context=self.ctx, timeout=15) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+            for j in data.get("data", []):
+                title = j.get("title", "")
+                company = j.get("company_name", "Unknown")
+                loc = j.get("location", "")
+                tags = " ".join(j.get("tags", []))
+                jobs.append({
+                    "id": f"arbeitnow|{j.get('id', '')}",
+                    "title": title,
+                    "company": company,
+                    "location": loc,
+                    "posted": j.get("created_at", ""),
+                    "url": j.get("url", j.get("application_url", "")),
+                    "source": "Arbeitnow",
+                    "description": tags[:200],
+                })
+        except Exception as e:
+            logger.error(f"Arbeitnow error: {e}")
+        return jobs
+
+
 class JobScraper:
     def __init__(self, sites_config, env):
         self.sites = sites_config.get("sites", [])
@@ -334,6 +411,8 @@ class JobScraper:
         self.jooble = JoobleScraper(env.get("JOOBLE_API_KEY", ""))
         self.remoteok = RemoteOKScraper()
         self.linkedin = LinkedInScraper()
+        self.remotive = RemotiveScraper()
+        self.arbeitnow = ArbeitnowScraper()
 
         self.last_run = None
         self.last_stats = {}
@@ -374,6 +453,8 @@ class JobScraper:
             "Jooble": "Active" if self.jooble.available else "No API key",
             "RemoteOK": "Active",
             "LinkedIn": "Active (public)",
+            "Remotive": "Active (free API)",
+            "Arbeitnow": "Active (free API)",
         }
 
     def run_scan(self, sent_ids=None, progress_callback=None):
@@ -383,20 +464,13 @@ class JobScraper:
         all_jobs = []
         stats = {}
 
-        async def notify(msg):
-            if progress_callback:
-                await progress_callback(msg)
-
-        import asyncio
-
         # Workday
         workday_jobs = []
-        for i, site in enumerate(self.sites):
+        for site in self.sites:
             try:
                 site_jobs = self.workday.scrape_site(site)
                 workday_jobs.extend(site_jobs)
                 stats[f"Workday ({site['name']})"] = {"total": len(site_jobs), "source": "Workday"}
-                logger.info(f"Workday {site['name']}: {len(site_jobs)} jobs")
             except Exception as e:
                 stats[f"Workday ({site['name']})"] = {"error": str(e), "source": "Workday"}
         all_jobs.extend(workday_jobs)
@@ -406,7 +480,6 @@ class JobScraper:
             adzuna_jobs = self.adzuna.scrape()
             all_jobs.extend(adzuna_jobs)
             stats["Adzuna"] = {"total": len(adzuna_jobs), "source": "Adzuna"}
-            logger.info(f"Adzuna: {len(adzuna_jobs)} jobs")
         except Exception as e:
             stats["Adzuna"] = {"error": str(e), "source": "Adzuna"}
 
@@ -415,7 +488,6 @@ class JobScraper:
             jooble_jobs = self.jooble.scrape()
             all_jobs.extend(jooble_jobs)
             stats["Jooble"] = {"total": len(jooble_jobs), "source": "Jooble"}
-            logger.info(f"Jooble: {len(jooble_jobs)} jobs")
         except Exception as e:
             stats["Jooble"] = {"error": str(e), "source": "Jooble"}
 
@@ -424,7 +496,6 @@ class JobScraper:
             remote_jobs = self.remoteok.scrape()
             all_jobs.extend(remote_jobs)
             stats["RemoteOK"] = {"total": len(remote_jobs), "source": "RemoteOK"}
-            logger.info(f"RemoteOK: {len(remote_jobs)} jobs")
         except Exception as e:
             stats["RemoteOK"] = {"error": str(e), "source": "RemoteOK"}
 
@@ -433,9 +504,24 @@ class JobScraper:
             linkedin_jobs = self.linkedin.scrape()
             all_jobs.extend(linkedin_jobs)
             stats["LinkedIn"] = {"total": len(linkedin_jobs), "source": "LinkedIn"}
-            logger.info(f"LinkedIn: {len(linkedin_jobs)} jobs")
         except Exception as e:
             stats["LinkedIn"] = {"error": str(e), "source": "LinkedIn"}
+
+        # Remotive
+        try:
+            remotive_jobs = self.remotive.scrape()
+            all_jobs.extend(remotive_jobs)
+            stats["Remotive"] = {"total": len(remotive_jobs), "source": "Remotive"}
+        except Exception as e:
+            stats["Remotive"] = {"error": str(e), "source": "Remotive"}
+
+        # Arbeitnow
+        try:
+            arbeitnow_jobs = self.arbeitnow.scrape()
+            all_jobs.extend(arbeitnow_jobs)
+            stats["Arbeitnow"] = {"total": len(arbeitnow_jobs), "source": "Arbeitnow"}
+        except Exception as e:
+            stats["Arbeitnow"] = {"error": str(e), "source": "Arbeitnow"}
 
         filtered = self.filter_jobs(all_jobs)
         new_jobs = [j for j in filtered if j["id"] not in sent_ids]
