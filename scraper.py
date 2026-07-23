@@ -16,6 +16,7 @@ INDIA_LOCATIONS = [
     "nagpur", "coimbatore", "kochi", "jaipur", "ahmedabad", "lucknow",
     "indore", "bhopal", "mysore", "mangalore", "visakhapatnam",
     "vijayawada", "tiruchirappalli", "madurai", "thiruvananthapuram", "kolkata",
+    "remote", "anywhere", "work from home", "india remote",
 ]
 
 TITLE_ALLOW = [
@@ -24,18 +25,59 @@ TITLE_ALLOW = [
     r"\bsde\b",
     r"developer\s+associate",
     r"graduate\s+software",
+    r"trainee\s+software",
+    r"junior\s+software",
+    r"fresher\s+software",
+    r"software\s+trainee",
+    r"software\s+analyst",
+    r"systems?\s+engineer",
+    r"technical\s+analyst",
+    r"programmer\s+analyst",
+    r"application\s+developer",
+    r"full[\s-]?stack",
+    r"back[\s-]?end",
+    r"front[\s-]?end",
+    r"java\s+developer",
+    r"python\s+developer",
+    r"cloud\s+engineer",
+    r"devops\s+engineer",
+    r"data\s+engineer",
+    r"ml\s+engineer",
+    r"machine\s+learning",
+    r"backend\s+developer",
+    r"frontend\s+developer",
+    r"mobile\s+developer",
+    r"ios\s+developer",
+    r"android\s+developer",
+    r"qa\s+engineer",
+    r"test\s+engineer",
+    r"automation\s+engineer",
+    r"platform\s+engineer",
+    r"infrastructure",
+    r"release\s+engineer",
+    r"build\s+engineer",
+    r"site\s+reliability",
+    r"\bsre\b",
+    r"technical\s+support\s+engineer",
 ]
 
 TITLE_EXCLUDE = [
     r"\bsenior\b", r"\bsr[\.\s]", r"\blead\b", r"\bprincipal\b",
     r"\bstaff\b", r"\barchitect\b", r"\bmanager\b", r"\bdirector\b",
-    r"\bvice\s+president\b", r"\bvp\b", r"\bintern\b", r"\binternship\b",
-    r"\bhead\b",
+    r"\bvice\s+president\b", r"\bvp\b", r"\bhead\b",
     r"\bII\b", r"\bIII\b", r"\bIV\b", r"\bV\b",
     r"[\s\-]2\b", r"[\s\-]3\b", r"[\s\-]4\b", r"[\s\-]5\b",
+    r"\bintern\b", r"\binternship\b", r"\bcontract\b",
+    r"\bconsultant\b", r"\badvisory\b",
 ]
 
-WORKDAY_QUERIES = ["Software Engineer", "Associate Software Engineer", "Software Developer"]
+WORKDAY_QUERIES = [
+    "Software Engineer", "Associate Software Engineer", "Software Developer",
+    "SDE", "Systems Engineer", "Java Developer", "Python Developer",
+    "Cloud Engineer", "DevOps Engineer", "Data Engineer",
+    "Full Stack Developer", "Backend Developer", "Frontend Developer",
+    "Fresher", "Graduate Engineer", "Trainee",
+]
 
 
 class WorkdayScraper:
@@ -54,7 +96,7 @@ class WorkdayScraper:
         with urllib.request.urlopen(req, context=self.ctx, timeout=30) as resp:
             return json.loads(resp.read().decode("utf-8"))
 
-    def scrape_site(self, site):
+    def scrape_site(self, site, progress_callback=None):
         api_url = f"https://{site['slug']}.{site['subdomain']}.myworkdayjobs.com/wday/cxs/{site['slug']}/{site['site_path']}/jobs"
         api_base = f"https://{site['slug']}.{site['subdomain']}.myworkdayjobs.com/en-US/{site['site_path']}"
 
@@ -107,10 +149,15 @@ class AdzunaScraper:
         if not self.available:
             return []
         jobs = []
-        queries = ["software engineer", "software developer", "SDE"]
+        queries = [
+            "software engineer fresher", "software developer junior",
+            "SDE fresher", "full stack developer", "java developer",
+            "python developer", "cloud engineer", "data engineer",
+            "backend developer", "frontend developer",
+        ]
         for q in queries:
             try:
-                url = f"https://api.adzuna.com/v1/api/jobs/in/search/1?app_id={self.app_id}&app_key={self.app_key}&q={q}&results_per_page=50&what=software+engineer&where=india&max_days_old=7"
+                url = f"https://api.adzuna.com/v1/api/jobs/in/search/1?app_id={self.app_id}&app_key={self.app_key}&q={urllib.parse.quote(q)}&results_per_page=50&what=software+engineer&where=india&max_days_old=14"
                 req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
                 with urllib.request.urlopen(req, context=self.ctx, timeout=15) as resp:
                     data = json.loads(resp.read().decode("utf-8"))
@@ -145,7 +192,14 @@ class JoobleScraper:
         if not self.available:
             return []
         jobs = []
-        queries = ["software engineer India", "software developer India", "SDE India"]
+        queries = [
+            "software engineer fresher India", "software developer junior India",
+            "SDE entry level India", "full stack developer India",
+            "java developer India", "python developer India",
+            "cloud engineer India", "data engineer India",
+            "backend developer India", "frontend developer India",
+            "freshers software engineer India", "trainee software India",
+        ]
         for q in queries:
             try:
                 url = f"https://jooble.org/api/"
@@ -183,6 +237,12 @@ class RemoteOKScraper:
 
     def scrape(self):
         jobs = []
+        tags_to_search = [
+            "software-engineer", "developer", "python", "java",
+            "javascript", "full-stack", "backend", "frontend",
+            "devops", "data-engineer", "cloud", "sre",
+            "mobile", "react", "node", "golang", "rust",
+        ]
         try:
             url = "https://remoteok.com/api"
             req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
@@ -210,6 +270,58 @@ class RemoteOKScraper:
         return jobs
 
 
+class LinkedInScraper:
+    def __init__(self):
+        self.ctx = ssl.create_default_context()
+
+    def scrape(self):
+        jobs = []
+        queries = [
+            "software engineer fresher india",
+            "software developer entry level india",
+            "SDE junior india",
+            "full stack developer india",
+            "java developer fresher india",
+            "python developer india",
+        ]
+        try:
+            for q in queries:
+                encoded = urllib.parse.quote(q)
+                url = f"https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords={encoded}&location=India&f_TPR=r604800&start=0"
+                req = urllib.request.Request(url, headers={
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                    "Accept": "text/html,application/xhtml+xml",
+                })
+                with urllib.request.urlopen(req, context=self.ctx, timeout=15) as resp:
+                    html = resp.read().decode("utf-8")
+                import re as re_mod
+                cards = re_mod.findall(r'<li class=".*?".*?</li>', html, re_mod.DOTALL)
+                for card in cards[:25]:
+                    title_m = re_mod.search(r'class="base-search-card__title"[^>]*>(.*?)</h3>', card, re_mod.DOTALL)
+                    company_m = re_mod.search(r'class="base-search-card__subtitle"[^>]*>.*?>(.*?)</a>', card, re_mod.DOTALL)
+                    link_m = re_mod.search(r'href="(https://www\.linkedin\.com/jobs/view/[^"]+)"', card)
+                    loc_m = re_mod.search(r'class="job-search-card__location"[^>]*>(.*?)</span>', card, re_mod.DOTALL)
+                    title = title_m.group(1).strip() if title_m else ""
+                    company = company_m.group(1).strip() if company_m else "Unknown"
+                    link = link_m.group(1) if link_m else ""
+                    loc = loc_m.group(1).strip() if loc_m else ""
+                    if title:
+                        jobs.append({
+                            "id": f"linkedin|{link.split('view/')[-1].split('?')[0] if 'view/' in link else title}",
+                            "title": title,
+                            "company": company,
+                            "location": loc,
+                            "posted": "Recent",
+                            "url": link,
+                            "source": "LinkedIn",
+                            "description": "",
+                        })
+                time.sleep(1)
+        except Exception as e:
+            logger.error(f"LinkedIn error: {e}")
+        return jobs
+
+
 class JobScraper:
     def __init__(self, sites_config, env):
         self.sites = sites_config.get("sites", [])
@@ -221,6 +333,7 @@ class JobScraper:
         self.adzuna = AdzunaScraper(env.get("ADZUNA_APP_ID", ""), env.get("ADZUNA_APP_KEY", ""))
         self.jooble = JoobleScraper(env.get("JOOBLE_API_KEY", ""))
         self.remoteok = RemoteOKScraper()
+        self.linkedin = LinkedInScraper()
 
         self.last_run = None
         self.last_stats = {}
@@ -260,56 +373,69 @@ class JobScraper:
             "Adzuna": "Active" if self.adzuna.available else "No API key",
             "Jooble": "Active" if self.jooble.available else "No API key",
             "RemoteOK": "Active",
+            "LinkedIn": "Active (public)",
         }
 
-    def run_scan(self, sent_ids=None):
+    def run_scan(self, sent_ids=None, progress_callback=None):
         if sent_ids is None:
             sent_ids = set()
 
         all_jobs = []
         stats = {}
 
+        async def notify(msg):
+            if progress_callback:
+                await progress_callback(msg)
+
+        import asyncio
+
         # Workday
-        logger.info("Scraping Workday sites...")
         workday_jobs = []
-        for site in self.sites:
+        for i, site in enumerate(self.sites):
             try:
                 site_jobs = self.workday.scrape_site(site)
                 workday_jobs.extend(site_jobs)
                 stats[f"Workday ({site['name']})"] = {"total": len(site_jobs), "source": "Workday"}
+                logger.info(f"Workday {site['name']}: {len(site_jobs)} jobs")
             except Exception as e:
                 stats[f"Workday ({site['name']})"] = {"error": str(e), "source": "Workday"}
         all_jobs.extend(workday_jobs)
-        time.sleep(1)
 
         # Adzuna
-        logger.info("Scraping Adzuna...")
         try:
             adzuna_jobs = self.adzuna.scrape()
             all_jobs.extend(adzuna_jobs)
             stats["Adzuna"] = {"total": len(adzuna_jobs), "source": "Adzuna"}
+            logger.info(f"Adzuna: {len(adzuna_jobs)} jobs")
         except Exception as e:
             stats["Adzuna"] = {"error": str(e), "source": "Adzuna"}
-        time.sleep(1)
 
         # Jooble
-        logger.info("Scraping Jooble...")
         try:
             jooble_jobs = self.jooble.scrape()
             all_jobs.extend(jooble_jobs)
             stats["Jooble"] = {"total": len(jooble_jobs), "source": "Jooble"}
+            logger.info(f"Jooble: {len(jooble_jobs)} jobs")
         except Exception as e:
             stats["Jooble"] = {"error": str(e), "source": "Jooble"}
-        time.sleep(1)
 
         # RemoteOK
-        logger.info("Scraping RemoteOK...")
         try:
             remote_jobs = self.remoteok.scrape()
             all_jobs.extend(remote_jobs)
             stats["RemoteOK"] = {"total": len(remote_jobs), "source": "RemoteOK"}
+            logger.info(f"RemoteOK: {len(remote_jobs)} jobs")
         except Exception as e:
             stats["RemoteOK"] = {"error": str(e), "source": "RemoteOK"}
+
+        # LinkedIn
+        try:
+            linkedin_jobs = self.linkedin.scrape()
+            all_jobs.extend(linkedin_jobs)
+            stats["LinkedIn"] = {"total": len(linkedin_jobs), "source": "LinkedIn"}
+            logger.info(f"LinkedIn: {len(linkedin_jobs)} jobs")
+        except Exception as e:
+            stats["LinkedIn"] = {"error": str(e), "source": "LinkedIn"}
 
         filtered = self.filter_jobs(all_jobs)
         new_jobs = [j for j in filtered if j["id"] not in sent_ids]
