@@ -140,7 +140,7 @@ async def scheduled_scan(job_bot: JobBot):
             summary = (
                 f"✅ <b>Auto-scan Complete</b> — {now_str}\n\n"
                 f"📄 Total fetched: {len(all_jobs)}\n"
-                f"🎯 Matching India SE/Fresher: {len(filtered)}\n"
+                f"🎯 Matching India IT Fresher: {len(filtered)}\n"
                 f"🆕 New jobs sent: {len(new_jobs)}\n\n"
                 f"📋 <b>Source Breakdown:</b>\n"
             )
@@ -148,7 +148,7 @@ async def scheduled_scan(job_bot: JobBot):
             summary = (
                 f"✅ <b>Auto-scan Complete</b> — {now_str}\n\n"
                 f"📄 Total fetched: {len(all_jobs)}\n"
-                f"🎯 Matching India SE/Fresher: {len(filtered)}\n"
+                f"🎯 Matching India IT Fresher: {len(filtered)}\n"
                 f"🆕 New jobs: 0\n\n"
                 f"No new matching postings right now.\n\n"
                 f"📋 <b>Source Breakdown:</b>\n"
