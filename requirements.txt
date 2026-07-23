@@ -1,2 +1,0 @@
-python-telegram-bot[job-queue]==21.3
-apscheduler==3.10.4
