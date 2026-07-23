@@ -4,3 +4,4 @@ __pycache__/
 seen_jobs.json
 scraper.log
 *.pyw
+railway-bot/
