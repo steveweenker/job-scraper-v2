@@ -76,6 +76,7 @@ class JobBot:
         await update.message.reply_text(
             "📋 <b>Available Commands</b>\n\n"
             "/check - Force scan now (with live progress)\n"
+            "/export - Download all fetched jobs as CSV\n"
             "/sources - Show active job sources\n"
             "/sites - List Workday companies\n"
             "/addsite &lt;name&gt; &lt;slug&gt; &lt;sub&gt; &lt;path&gt; - Add company\n"
@@ -226,6 +227,7 @@ class JobBot:
             new_jobs = [j for j in filtered if j["id"] not in self.seen_ids]
 
             self.scraper.last_run = datetime.now().isoformat()
+            self.scraper.last_all_jobs = all_jobs
             self.scraper.last_stats = {
                 "total_fetched": len(all_jobs),
                 "matching": len(filtered),
@@ -363,6 +365,31 @@ class JobBot:
             lines.append(f"\n... and {len(self.seen_ids) - 20} more")
         await update.message.reply_text("\n".join(lines), parse_mode="HTML")
 
+    async def cmd_export(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if not self.scraper.last_all_jobs:
+            await update.message.reply_text("No scan data yet. Run /check first.")
+            return
+
+        await update.message.reply_text("Generating CSV...")
+
+        filepath = "jobs_export.csv"
+        self.scraper.generate_csv(filepath)
+
+        with open(filepath, "rb") as f:
+            await context.bot.send_document(
+                chat_id=update.effective_chat.id,
+                document=f,
+                filename="jobs_export.csv",
+                caption="📋 <b>All Fetched Jobs</b>\n\n"
+                        "Columns: Source, Company, Title, Location, Posted, Match Status, URL\n\n"
+                        "✅ Match = India IT Fresher\n"
+                        "❌ Not India = Location filter\n"
+                        "❌ Title mismatch = Title filter",
+                parse_mode="HTML",
+            )
+
+        os.remove(filepath)
+
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Type /help to see available commands.")
 
@@ -377,5 +404,6 @@ class JobBot:
         app.add_handler(CommandHandler("rmsite", self.cmd_rmsite))
         app.add_handler(CommandHandler("status", self.cmd_status))
         app.add_handler(CommandHandler("seen", self.cmd_seen))
+        app.add_handler(CommandHandler("export", self.cmd_export))
         app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message))
         return app

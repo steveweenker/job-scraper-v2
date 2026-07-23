@@ -416,6 +416,7 @@ class JobScraper:
 
         self.last_run = None
         self.last_stats = {}
+        self.last_all_jobs = []
 
     def is_india_job(self, job):
         loc = (job.get("location", "") or "").lower()
@@ -445,6 +446,31 @@ class JobScraper:
 
             result.append(job)
         return result
+
+    def get_match_reason(self, job):
+        if not self.is_india_job(job):
+            return "Not India"
+        if not self.matches_title(job.get("title", "")):
+            return "Title mismatch"
+        return "Match"
+
+    def generate_csv(self, filepath="jobs_export.csv"):
+        import csv
+        with open(filepath, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(["Source", "Company", "Title", "Location", "Posted", "Match Status", "URL"])
+            for job in self.last_all_jobs:
+                match_status = self.get_match_reason(job)
+                writer.writerow([
+                    job.get("source", ""),
+                    job.get("company", ""),
+                    job.get("title", ""),
+                    job.get("location", ""),
+                    job.get("posted", ""),
+                    match_status,
+                    job.get("url", ""),
+                ])
+        return filepath
 
     def get_sources_status(self):
         return {
@@ -527,6 +553,7 @@ class JobScraper:
         new_jobs = [j for j in filtered if j["id"] not in sent_ids]
 
         self.last_run = datetime.now().isoformat()
+        self.last_all_jobs = all_jobs
         self.last_stats = {
             "total_fetched": len(all_jobs),
             "matching": len(filtered),
